@@ -22,6 +22,19 @@ class BaseCheck(ABC):
         )
 
 
+class RequiredColumnsCheck(BaseCheck):
+    def __init__(self, required_columns: list[str]) -> None:
+        self.required_columns = required_columns
+
+    def run(self, df: pd.DataFrame) -> CheckResult:
+        missing = [c for c in self.required_columns if c not in df.columns]
+        return CheckResult(
+            check_name="required_columns",
+            passed=not missing,
+            details=f"Missing columns: {missing}" if missing else "All required columns present",
+        )
+
+
 class NullThresholdCheck(BaseCheck):
     def __init__(self,threshold:float) -> None:
         self.threshold = threshold
@@ -68,7 +81,7 @@ class PipelineValidator:
         self.checks: list[BaseCheck] = [
             RequiredColumnsCheck(config.required_columns),
             NullThresholdCheck(config.null_threshold),
-            ColumnRangeCheck(config.column_ranges),
+            ColumnsRangedCheck(config.column_ranges),
         ]
 
     def validate(self, df: pd.DataFrame) -> ValidationReport:
