@@ -43,7 +43,7 @@ class MetricRegistry:
         return value>=threshold
     
     @classmethod
-    def register(cls,name:str,scorer:callable,lower_is_better:bool = False) -> None:
+    def register(cls,name:str,scorer:Callable,lower_is_better:bool = False) -> None:
         cls._REGISTRY[name] = scorer
         if lower_is_better:
             cls._LOWER_IS_BETTER.add(name)
