@@ -1,0 +1,89 @@
+{
+    "pipeline_id": "pipeline_1",
+    "name": "Smoke Test Pipeline",
+    "nodes": [
+        {
+            "id": "n1",
+            "type": "dataset",
+            "name": "Dataset",
+            "position": [
+                0,
+                0
+            ],
+            "source_path": "datasets/sample.csv",
+            "target_column": "label",
+            "test_size": 0.2
+        },
+        {
+            "id": "n2",
+            "type": "validation",
+            "name": "Validation",
+            "position": [
+                200,
+                0
+            ],
+            "required_columns": [
+                "x1",
+                "x2",
+                "x3",
+                "label"
+            ],
+            "null_threshold": 0.05,
+            "column_ranges": {}
+        },
+        {
+            "id": "n3",
+            "type": "training",
+            "name": "Training",
+            "position": [
+                400,
+                0
+            ],
+            "algorithm": "random_forest_classifier",
+            "hyperparameters": {
+                "n_estimators": 50,
+                "max_depth": 5
+            }
+        },
+        {
+            "id": "n4",
+            "type": "evaluation",
+            "name": "Evaluation",
+            "position": [
+                600,
+                0
+            ],
+            "metric": "accuracy",
+            "threshold": 0.6
+        },
+        {
+            "id": "n5",
+            "type": "registry",
+            "name": "Registry",
+            "position": [
+                800,
+                0
+            ],
+            "model_name": "sample_model",
+            "stage": "Staging"
+        }
+    ],
+    "edges": [
+        {
+            "source": "n1",
+            "target": "n2"
+        },
+        {
+            "source": "n2",
+            "target": "n3"
+        },
+        {
+            "source": "n3",
+            "target": "n4"
+        },
+        {
+            "source": "n4",
+            "target": "n5"
+        }
+    ]
+}
