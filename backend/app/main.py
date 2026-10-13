@@ -19,6 +19,9 @@ from pipeline_schema.models import (
     ValidationNodeConfig
 )
 from pipeline_schema.validators import ValidationReport
+from fastapi.middleware.cors import CORSMiddleware
+
+
 
 MLFLOW_TRACING_URI="http://localhost:5000"
 
@@ -109,7 +112,13 @@ def build_runner() -> PipelineRunner:
 
 
 
-app = FastAPI(title="No_code_platform")
+app = FastAPI(title="No-Code MLOps Platform")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 runner = build_runner()
 
 @app.post("/pipelines/run")
