@@ -4,6 +4,11 @@ __pycache__/
 .venv/
 venv/
 *.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
 
 # Node
 node_modules/
@@ -20,9 +25,20 @@ mlartifacts/
 .dvc/cache/
 *.db
 
+# Generated/local datasets — DVC or the generator script owns these, not Git
+datasets/*.csv
+datasets/*.parquet
+datasets/*.json
+!datasets/README.md
+
 # Monitoring
 monitoring/reports/*.html
 !monitoring/reports/.gitkeep
 
+# Editors
+.vscode/
+.idea/
+
 # OS
 .DS_Store
+Thumbs.db
