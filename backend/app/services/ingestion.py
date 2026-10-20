@@ -7,9 +7,10 @@ from pipeline_schema.models import DatasetNodeConfig
 
 @dataclass
 class IngestionResult:
-    tain_df: pd.DataFrame
-    test_df:pd.DataFrame
-    target_columns:list[str]
+    train_df: pd.DataFrame
+    test_df: pd.DataFrame
+    target_columns: str
+    feature_columns: list[str]
 
 class DatasetLoader:
     _LOADERS = {
@@ -47,8 +48,8 @@ class IngestionService:
         )
         
         return IngestionResult(
-            train_df = train_df.reset_index(drop=True),
+            train_df=train_df.reset_index(drop=True),
             test_df=test_df.reset_index(drop=True),
             target_columns=config.target_column,
-            feature_column=feature_column,
+            feature_columns=feature_column,
         )

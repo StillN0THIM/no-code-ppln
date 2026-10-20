@@ -13,13 +13,8 @@ class CheckResult:
 
 class BaseCheck(ABC):
     @abstractmethod
-    def run(self,df:pd.DataFrame) -> CheckResult:
-        missing = [c for c in self.required_columns if c not in df.columns]
-        return CheckResult(
-            check_name="required_columns",
-            passed=not missing,
-            details=f"Missing Columns:{missing}" if missing else "All required columns present",
-        )
+    def run(self, df: pd.DataFrame) -> CheckResult:
+        pass
 
 
 class RequiredColumnsCheck(BaseCheck):
@@ -50,17 +45,17 @@ class NullThresholdCheck(BaseCheck):
 
 
 class ColumnsRangedCheck(BaseCheck):
-    def __init__(self,column_ranges: dict[str,tuple[float,float]]) -> None:
-        self.column_ranges = self.column_range
+    def __init__(self, column_ranges: dict[str, tuple[float, float]]) -> None:
+        self.column_ranges = column_ranges
     
-    def run(self, df:pd.DataFrame) -> CheckResult:
-        violation: dict[str,int] = {}
-        for column, (low,high) in self.column_ranges.items():
+    def run(self, df: pd.DataFrame) -> CheckResult:
+        violation: dict[str, int] = {}
+        for column, (low, high) in self.column_ranges.items():
             if column not in df.columns:
                 continue
-        out_of_range = df[df(column < low) | (df[column]>high)]
-        if not out_of_range.empty:
-            violation[column] = len(out_of_range)
+            out_of_range = df[(df[column] < low) | (df[column] > high)]
+            if not out_of_range.empty:
+                violation[column] = len(out_of_range)
         return CheckResult(
             check_name="column_ranges",
             passed=not violation,

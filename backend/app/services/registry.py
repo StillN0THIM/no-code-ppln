@@ -9,10 +9,10 @@ from pipeline_schema.models import RegistryNodeConfig
 @dataclass
 class RegistryResult:
     registered: bool
-    model_name = str | None = None
-    version = str | None = None
-    run_id = str | None = None
-    skipped_reason = str | None = None
+    model_name: str | None = None
+    version: str | None = None
+    run_id: str | None = None
+    skipped_reason: str | None = None
 
 class MlflowModelRegistry:
     def __init__(self , tracking_uri:str)->None:
@@ -34,6 +34,7 @@ class MlflowModelRegistry:
                 sk_model=model,
                 artifact_path="model",
                 registered_model_name=model_name,
+                serialization_format="cloudpickle",
             )
             
             client = mlflow.tracking.MlflowClient()
@@ -65,6 +66,7 @@ class RegistryService:
         return self.registry.log_and_register(
             model=model,
             model_name=config.model_name,
-            stage=config.metric_name,
-            metric_value=evaluation.metric_value
+            stage=config.stage,
+            metric_name=evaluation.metric_name,
+            metric_value=evaluation.metric_value,
         )

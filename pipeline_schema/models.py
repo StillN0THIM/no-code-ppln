@@ -18,9 +18,9 @@ class BaseNodeConfig(BaseModel):
 
 class DatasetNodeConfig(BaseNodeConfig):
     type: Literal[NodeType.DATASET] = NodeType.DATASET
-    source_path = str
-    target_column = str
-    test_size : float = Field(default=0.2,ge=0.0,le=1.0)
+    source_path: str
+    target_column: str
+    test_size: float = Field(default=0.2, ge=0.0, le=1.0)
 
 class ValidationNodeConfig(BaseNodeConfig):
     type: Literal[NodeType.VALIDATION] = NodeType.VALIDATION
@@ -41,7 +41,7 @@ class EvaluationNodeConfig(BaseNodeConfig):
 class RegistryNodeConfig(BaseNodeConfig):
     type: Literal[NodeType.REGISTRY] = NodeType.REGISTRY
     model_name: str
-    stage: Literal["staging","Production"] = "staging"
+    stage: Literal["staging", "Production", "Staging", "production"] = "Staging"
 
 
 NodeConfig = Union[
@@ -72,7 +72,7 @@ class PipelineConfig(BaseModel):
     def topological_order(self) -> list[NodeConfig]:
         node_map = {n.id: n for n in self.nodes}
         incoming = {n.id: 0 for n in self.nodes}
-        for edge in self.nodes:
+        for edge in self.edges:
             incoming[edge.target] += 1
         
         queue = [n for n in self.nodes if incoming[n.id]==0]

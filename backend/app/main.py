@@ -27,11 +27,12 @@ MLFLOW_TRACING_URI="http://localhost:5000"
 
 @dataclass
 class PipelineRunResult:
-    pipeline_id = str
+    pipeline_id: str
     model: BaseEstimator | None = None
     ingestion: IngestionResult | None = None
-    validation: ValidationReport | None=None
-    training: TrainingResult | None=None
+    validation: ValidationReport | None = None
+    training: TrainingResult | None = None
+    evaluation: EvaluationResult | None = None
     registry: RegistryResult | None = None
     stopped_at: str | None = None
     errors: list[str] = field(default_factory=list)
@@ -70,7 +71,7 @@ class PipelineRunner:
         
         return result
     
-    def _handel_dataset(self,node:NodeConfig,result:PipelineRunResult) -> bool:
+    def _handle_dataset(self,node:NodeConfig,result:PipelineRunResult) -> bool:
         assert isinstance( node, DatasetNodeConfig)
         result.ingestion = self.ingestion.run(node)
         return True
