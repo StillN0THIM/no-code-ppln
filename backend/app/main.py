@@ -20,10 +20,10 @@ from pipeline_schema.models import (
 )
 from pipeline_schema.validators import ValidationReport
 from fastapi.middleware.cors import CORSMiddleware
+from backend.app.core.config import settings
 
 
-
-MLFLOW_TRACING_URI="http://localhost:5000"
+#MLFLOW_TRACING_URI="http://localhost:5000"
 
 @dataclass
 class PipelineRunResult:
@@ -107,7 +107,7 @@ def build_runner() -> PipelineRunner:
         validation=ValidationService(),
         training=TrainingService(),
         evaluation=EvaluationService(),
-        registry=RegistryService(MlflowModelRegistry(tracking_uri=MLFLOW_TRACING_URI)),
+        registry=RegistryService(MlflowModelRegistry(tracking_uri=settings.mlflow_tracking_url)),
     )
 
 
@@ -116,7 +116,7 @@ def build_runner() -> PipelineRunner:
 app = FastAPI(title="No-Code MLOps Platform")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=settings.cors_allowed_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )
