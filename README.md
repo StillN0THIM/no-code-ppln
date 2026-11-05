@@ -1,139 +1,58 @@
 # No-Code MLOps Platform
 
-A visual, drag-and-drop pipeline builder for ML workflows:
+I'm building this to actually understand MLOps end to end — not just the
+training/evaluation part most portfolio projects stop at, but the
+orchestration, the CI/CD, the drift monitoring, all of it. The idea: a canvas
+where you wire up Dataset → Validation → Training → Evaluation → Registry →
+Deployment → Monitoring → Retraining, and the pipeline-config-as-code it emits
+runs on top of MLflow, DVC, Evidently and GitHub Actions instead of
+reinventing any of them.
 
-```
-Dataset → Validation → Training → Evaluation → Registry → Deployment → Monitoring → Retraining
-```
+It's scoped into four phases on purpose. I didn't want a project that's "90%
+done" for six months straight — each phase is something that actually runs
+and can be shown, even if the next one hasn't been started.
 
-Built as an **orchestration + UI layer over existing MLOps tools** (MLflow, DVC,
-Evidently, GitHub Actions) rather than reinventing them. The goal is a platform
-where a user builds a pipeline visually, and that pipeline runs, tracks, gates,
-deploys, and monitors itself using production-grade tools underneath.
+## Where it actually is right now
 
-The project is scoped into four phases so each one is independently demoable —
-it's never "not done enough" to show.
+Phase 0 and Phase 1 are built and working locally — canvas, FastAPI backend,
+the five pipeline services, MLflow registration, and a test suite
+(`backend/tests/`) covering the happy path, a failed evaluation gate, and a
+failed validation gate. Phase 2 is in progress: `ci.yml` runs the unit tests
+on every push, `cd.yml` and the promotion script exist but haven't been run
+against a real deploy target yet. Phases 3 and 4 haven't started.
 
----
+## Stack
 
-## Project Phases
+Canvas is React + React Flow. Backend is FastAPI, with Pydantic models
+defining the pipeline config — that schema is the thing everything else is
+built around (`pipeline_schema/models.py`). Training uses scikit-learn,
+tracked and registered through MLflow, run metadata in Postgres. CI/CD is
+GitHub Actions. Monitoring, once Phase 3 happens, will be Evidently against a
+Postgres-backed prediction log.
 
-| Phase | Goal | Status |
-|-------|------|--------|
-| **0 — Foundations** | Pipeline config schema, repo skeleton, base Docker image, dataset selection | ⬜ |
-| **1 — Core Pipeline** | Visual canvas (React Flow) → config → manual pipeline run (ingest, validate, train, evaluate, register) | ⬜ |
-| **2 — CI/CD for ML** | GitHub Actions pipeline: auto validate/train/evaluate on push, auto-promote + redeploy on pass | ⬜ |
-| **3 — Monitoring & Retraining** | Drift detection (Evidently), scheduled reports, automatic retrain trigger | ⬜ |
-| **4 — Polish** | Multi-pipeline support, run history, live node status, demo video | ⬜ |
+## Running it
 
-See [`docs/architecture.md`](docs/architecture.md) for the detailed design per phase.
-
----
-
-## Tech Stack
-
-| Layer | Tool |
-|-------|------|
-| Canvas UI | React + React Flow |
-| Backend / orchestration | FastAPI |
-| Config schema | Pydantic |
-| Data versioning | DVC |
-| Data validation | Great Expectations / Pydantic checks |
-| Training | scikit-learn / PyTorch |
-| Experiment tracking + registry | MLflow |
-| Run metadata storage | PostgreSQL |
-| CI/CD | GitHub Actions |
-| Image registry | GitHub Container Registry |
-| Model serving | FastAPI (separate service) |
-| Drift / monitoring | Evidently AI |
-| Dashboard | Prometheus + Grafana (or lightweight FastAPI+HTML) |
-| Containerization | Docker / docker-compose |
-
----
-
-## Repository Structure
-
-```
-no-code-mlops-platform/
-├── pipeline_schema/        # Phase 0: Pydantic models for the pipeline config (nodes, params, edges, gates)
-├── datasets/                # Chosen dataset + notes
-├── notebooks/                # Baseline exploration notebook
-├── docker/
-│   └── base.Dockerfile       # Reproducible execution image used locally + in CI
-├── backend/                  # FastAPI orchestration service (Phase 1+)
-│   ├── app/
-│   │   ├── api/               # Route handlers
-│   │   ├── core/              # Config, settings, shared utilities
-│   │   ├── models/             # DB/domain models
-│   │   └── services/          # One class per pipeline stage
-│   │       ├── ingestion.py
-│   │       ├── validation.py
-│   │       ├── training.py
-│   │       ├── evaluation.py
-│   │       └── registry.py
-│   └── tests/
-├── frontend/                  # React + React Flow canvas (Phase 1+)
-│   └── src/
-│       ├── components/nodes/   # Dataset/Validation/Training/Evaluation/Registry node components
-│       ├── pages/
-│       └── services/            # API client layer
-├── serving/                     # Standalone model-serving FastAPI service (Phase 2+)
-├── monitoring/                   # Drift jobs + generated reports (Phase 3)
-├── .github/workflows/              # ci.yml, cd.yml
-├── docs/
-│   └── architecture.md
-├── docker-compose.yml
-└── LICENSE
-```
-
----
-
-## Getting Started
-
-**Prerequisites:** Python 3.11+, Node 18+, Docker & Docker Compose, Git.
+Python 3.11+, Node 18+, Docker.
 
 ```bash
-git clone <your-repo-url>
-cd no-code-mlops-platform
+docker-compose up -d postgres mlflow
 
-# Backend
 cd backend
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-
-# Frontend
-cd ../frontend
-npm install
-
-# Infra (Postgres + MLflow)
 cd ..
-docker-compose up -d postgres mlflow
+uvicorn backend.app.main:app --reload
 ```
-
-Run the backend locally:
-
-```bash
-cd backend
-uvicorn app.main:app --reload
-```
-
-Run the frontend locally:
 
 ```bash
 cd frontend
+npm install
 npm run dev
 ```
 
----
+Drop the five nodes onto the canvas, wire them top to bottom, fill in the
+fields, hit run. To check the backend works without touching the UI at all,
+there's a sample dataset generator and a test payload —
+`datasets/generate_sample.py` and `test_pipeline.json`.
 
-## Explicitly Out of Scope (v1)
-
-Kubernetes orchestration, distributed/multi-GPU training, feature stores, and
-cloud infrastructure (AWS/GCP) are deliberately deferred as future extensions —
-noted here to signal awareness without taking them on in v1.
-
----
-
-## License
-
-MIT — see [LICENSE](LICENSE).
+## Layout
