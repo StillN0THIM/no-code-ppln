@@ -56,3 +56,20 @@ there's a sample dataset generator and a test payload —
 `datasets/generate_sample.py` and `test_pipeline.json`.
 
 ## Layout
+
+pipeline_schema/ pydantic models for the pipeline config
+backend/app/services/ one class per pipeline stage
+frontend/src/ the canvas
+serving/ standalone model-serving app (Phase 2+)
+monitoring/ drift jobs (Phase 3)
+.github/workflows/ ci.yml, cd.yml
+
+
+
+## What's deliberately not here
+
+No Kubernetes, no distributed training, no feature store, no cloud infra. Not
+because they're hard — because none of them teach you anything about MLOps
+specifically, they're infrastructure problems, not pipeline problems. Might
+revisit as future work once the core loop is solid.
+
