@@ -3,7 +3,10 @@ import unittest
 from pathlib import Path
 from pipeline_schema.models import PipelineConfig
 from backend.app.main import build_runner
+import pytest
 
+
+@pytest.mark.integration
 class TestSmokePipeline(unittest.TestCase):
     def test_pipeline_execution(self):
         project_root = Path(__file__).resolve().parent.parent.parent
