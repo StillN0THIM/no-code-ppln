@@ -1,0 +1,10 @@
+  serving:
+    build:
+      context: .
+      dockerfile: serving/Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      SERVING_MLFLOW_TRACKING_URI: http://mlflow:5000
+    depends_on:
+      - mlflow
